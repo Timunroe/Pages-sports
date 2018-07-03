@@ -1,0 +1,25 @@
+{% extends '_base.html' %} {% set active_page = 'index' %} {% block body %}
+
+{% set page_data = [ 
+    {"category": "Football", "sections": ["Ticats-CFL", "Bills-NFL"]}, 
+    {"category": "Soccer", "sections": ["World Cup", "TFC-MLS-Europe"]}, 
+    {"category": "Baseball", "sections": ["Blue Jays-MLB"]}, 
+    {"category": "Hockey", "sections": ["Leafs-NHL", "Bulldogs-OHL", "Marlies-AHL", "IIHF-Olympics"]},
+    {"category": "Basketball", "sections": ["Raptors-NBA", "CEBL-NBLC", "FIBA"]}
+] %}
+
+<div class="row">
+    {% for item in page_data %}
+    <div class="col-sm" style="min-width: 10rem;">
+        <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action active">
+                {{ item.category }}
+            </a>
+            {% for section in item.sections %}
+                <a href="#" class="list-group-item list-group-item-action">{{ section }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock body %}
