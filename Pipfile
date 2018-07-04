@@ -12,6 +12,7 @@ requests = "*"
 pylint = "*"
 smartypants = "*"
 "boto3" = "*"
+yapf = "*"
 
 [dev-packages]
 
