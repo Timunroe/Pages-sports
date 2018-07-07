@@ -60,6 +60,50 @@
                 <span class="small">HOURS</span>
             </div>
             {% endif %}
+            {% if active_page == 'feed' -%}
+            <div class="mr-3">
+                <label class="small" style="" for="categories">CATEGORIES</label>
+                <select multiple class="" size="1" name="categories">
+                {% for category in ["baseball", "basketball", "curling", "football", "golf", "hockey", "local", "soccer", "tennis",  "ticats"] %}
+                <option
+                    {% if item['categories'] %}
+                        {% if category in item['categories'] %} value selected="selected" {% else %} value="{{ item['asset_id'] }}__category__{{category}}" {% endif %}
+                    {% else %}
+                        value="{{ item['asset_id'] }}__category__{{category}}"
+                    {% endif %}
+                    >{{ category }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="">
+                <label class="small" style="" for="sections">SECTIONS</label>
+                <select multiple class="" name="sections">
+                {% for section in ["ticats", "cfl", "bills", "nfl", "jays", "mlb", "tfc", "mls", "world cup", "raptors", "nba", "leafs", "nhl", "bulldogs", "ohl", "pga", "lpga"] %}
+                <option
+                    {% if item['sections'] %}
+                        {% if section in item["sections"] %} value selected="selected" {% else %} value="{{ item['asset_id'] }}__section__{{ section }}" {% endif %}
+                    {% else %}
+                        value="{{ item['asset_id'] }}__section__{{section}}"
+                    {% endif %}
+                    >{{ section }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="">
+                <label class="small" style="" for="rank_time">TAGS</label>
+                <select multiple class="" name="rank_time">
+                {% for tag in ["profile", "feature", "analysis"] %}
+                <option
+                    {% if item['tags'] %}
+                        {% if tag in item["tags"] %} value selected="selected" {% else %} value="{{ item['asset_id'] }}__tag__{{ tag }}" {% endif %}
+                    {% else %}
+                        value="{{ item['asset_id'] }}__tag__{{ tag }}"
+                    {% endif %}
+                    >{{ tag }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

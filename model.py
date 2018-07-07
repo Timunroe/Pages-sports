@@ -30,7 +30,9 @@ def parse_feed(items):
         if 'categoriesSubCategories' in item:    
             post['categories_api'] = list(set([item for sublist in item['categoriesSubCategories'] for item in sublist.split('||')]))
         else:
-            post['categories_api'] = ""
+            post['categories_api'] = []
+        post['sections_api'] = []
+        post['tags_api'] = []
         post['desc_api'] = smartypants.smartypants(item['description'].strip())
         post['desc_api'] = " ".join(post['desc_api'].split())
         if item['contentType'] == 'ArticleBlogpost':
@@ -86,23 +88,24 @@ def parse_feed(items):
 
 
 def filter_feed(items):
-    new_list =[]
-    m = re.compile('Ticats', flags=re.I)
-    for item in items:
-        # is 'Ticats' in 'categories_api'?
-        if any(m.search(x) for x in item['categories_api']):
-            # Yes. Add item to new_list
-            new_list.append(item)
-            # No. Is 'Ticats in 'title' OR 'description' OR 'caption'?
-        elif any(m.search(x) for x in [item['title_api'], item['desc_api'], item['caption_api']]):
-            # Yes. Add item to new_list
-            new_list.append(item)
-            # No. Set item to draft
-        else:
-            item['draft_api'] = True
-            new_list.append(item)
-    return new_list
-
+    # new_list =[]
+    # # must overhaul ... set sections based on criteria
+    # m = re.compile('Ticats', flags=re.I)
+    # for item in items:
+    #     # is 'Ticats' in 'categories_api'?
+    #     if any(m.search(x) for x in item['categories_api']):
+    #         # Yes. Add item to new_list
+    #         new_list.append(item)
+    #         # No. Is 'Ticats in 'title' OR 'description' OR 'caption'?
+    #     elif any(m.search(x) for x in [item['title_api'], item['desc_api'], item['caption_api']]):
+    #         # Yes. Add item to new_list
+    #         new_list.append(item)
+    #         # No. Set item to draft
+    #     else:
+    #         item['draft_api'] = True
+    #         new_list.append(item)
+    # return new_list
+    return items
 
 def munge_feed(items):
     # input a list of dicts (ie fetched data from an api, rss)
@@ -154,7 +157,7 @@ def db_insert(c_posts, check=True):
                 # print(f"Post draft_api is: {post['draft_api']}")
                 if post['draft_api'] is True:
                     # print("Setting draft to 1 ...")
-                    new_post['draft_user'] = 1
+                    new_post['draft'] = 1
                 # print("Defaults going in")
                 # print(new_post)
                 db.insert(new_post)
@@ -169,19 +172,17 @@ def db_insert(c_posts, check=True):
 
 def get_new_data(s_file_name):
     print("++++++++++\nIn get_new_data module ...")
-    for api in cfg.config['apis']:
-        data = fetch.fetch_data(s_url=api['url'], l_filter=api['filter'])
+    # need to select which apis(s) to check
+    for api in cfg.config['apis'][s_file_name]:
+        data = fetch.fetch_data(s_url=api, l_filter=cfg.config['apis']['filter'])
         raw_posts = parse_feed(data)
         # posts = munge_feed(raw_posts)
         posts = filter_feed(raw_posts)
         db_insert(posts)
-        time.sleep(1)
+        time.sleep(2)
 
 
 def get_lineup(s_file_name):
-    # need simple version for 'feed' page -- simple query of items not archived/deleted
-    # and version for specfici pages -- extracting by category, section, tag
-    # -----------
     # how do we deal when draft/rank conflict?
     # At the moment, a ranked item set to draft
     # shows up in Lineup (by rank) without draft, AND on drafts page
@@ -217,7 +218,6 @@ def get_lineup(s_file_name):
         # so latest item with same rank is ahead of older item with same rank?
         idx = (item['rank'] - 1)
         lineup[idx:idx] = [item]
-
     db.close()
     # print("Records going into lineup:")
     # print(records)
@@ -225,14 +225,13 @@ def get_lineup(s_file_name):
 
 
 def request_item(form_data, asset_id):
-    fields = ["rank", "rank_time", "draft_user", "desc_user", "title_user"]
+    fields = ["rank", "rank_time", "draft", "desc", "title"]
     post = {}
     post['asset_id'] = asset_id
     for field in fields:
         if form_data[field] != '':
             post[field] = form_data[field]
     return post
-
 
 # def request_lineup(form_data):
 #     fields = ["rank", "rank_time", "draft"]
@@ -273,10 +272,10 @@ def parse_form(form_data, kind="list"):
         # mutiple changes possible but only 1 asset affected
         post_update = {}
         asset_id = form_data_dict['asset_id'][0]
-        for x in ['draft_user', 'rank', 'rank_time']:
+        for x in ['draft', 'rank', 'rank_time']:
             if form_data_dict[x][0] != '':
                 post_update[x] = int(form_data_dict[x][0])
-        for x in ['label_user', 'title_user', 'desc_user']:
+        for x in ['label', 'title', 'desc']:
             if form_data_dict[x][0] != '':
                 post_update[x] = smartypants.smartypants(form_data_dict[x][0].strip())
         print("Data to update:")
@@ -309,12 +308,12 @@ def is_draft(val, condition=True):
     # returns true/false if given record
     # 'condition' is boolean. True means we want items in 'draft
     if condition is True:
-        records = [x for x in val if x['draft_user'] > 0]
+        records = [x for x in val if x['draft'] > 0]
         # print("+++++++++++\nThese items ARE in draft:")
         # for z in records:
         # print(z['title_api'])
     else:
-        records = [x for x in val if x['draft_user'] == 0]
+        records = [x for x in val if x['draft'] == 0]
         # print("+++++++++++\nThese items are NOT in draft:")
         # for z in records:
         # print(z['title_'])
@@ -338,7 +337,7 @@ def set_draft(ids, status=True):
     draft = 2 if status else 0
     for item_id in ids:
         if item_id:
-            db.update({'draft_user': draft}, Record.asset_id == item_id)
+            db.update({'draft': draft}, Record.asset_id == item_id)
             print(f"++++++++\nSetting this item: {item_id} to status: {draft}\n++++++++")
     db.close()
     return

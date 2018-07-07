@@ -34,7 +34,7 @@ def build_template(file_name):
     html = j2_env.get_template(template_name).render(data=template_data)
     html_minified = minify_html(html)
     css = fetch.fetch_css()
-    script_template = getattr(x, 'foobar')
+    script_template = getattr(tmpl, s_file_name)
     script_name = file_name + ".js"
     script = Template(tmpl.script_template).substitute(css=css, minified=html_minified)
 
