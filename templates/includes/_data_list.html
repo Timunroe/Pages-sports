@@ -63,8 +63,9 @@
             {% if active_page == 'feed' -%}
             <div class="mr-3">
                 <label class="small" style="" for="categories">CATEGORIES</label>
-                <select multiple class="" size="1" name="categories">
-                {% for category in ["baseball", "basketball", "curling", "football", "golf", "hockey", "local", "soccer", "tennis",  "ticats"] %}
+                <select class="" size="1" name="categories">
+                <option value="">Select a category</option>
+                {% for category in ["baseball_jays_mlb", "football_ticats_cfl", "football_bills_nfl", "golf", "hockey_leafs-NHL", "hockey_bulldogs_ohl", "soccer_tfc_mls", "tennis", "basketball_raptors_nba", "cycling", "curling", "auto_racing"]|sort %}
                 <option
                     {% if item['categories'] %}
                         {% if category in item['categories'] %} value selected="selected" {% else %} value="{{ item['asset_id'] }}__category__{{category}}" {% endif %}
@@ -75,7 +76,7 @@
                 {% endfor %}
                 </select>
             </div>
-            <div class="">
+            <!-- <div class="">
                 <label class="small" style="" for="sections">SECTIONS</label>
                 <select multiple class="" name="sections">
                 {% for section in ["ticats", "cfl", "bills", "nfl", "jays", "mlb", "tfc", "mls", "world cup", "raptors", "nba", "leafs", "nhl", "bulldogs", "ohl", "pga", "lpga"] %}
@@ -88,8 +89,8 @@
                     >{{ section }}</option>
                 {% endfor %}
                 </select>
-            </div>
-            <div class="">
+            </div> -->
+            <!-- <div class="">
                 <label class="small" style="" for="rank_time">TAGS</label>
                 <select multiple class="" name="rank_time">
                 {% for tag in ["profile", "feature", "analysis"] %}
@@ -102,7 +103,7 @@
                     >{{ tag }}</option>
                 {% endfor %}
                 </select>
-            </div>
+            </div> -->
             {% endif %}
         </div>
     </div>
