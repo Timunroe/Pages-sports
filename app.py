@@ -20,7 +20,7 @@ def feed():
         if request.form['action'] == 'fetch':
             model.get_new_data('feed')
     template_data = {"items": model.get_lineup('feed')}
-    return render_template('feed.html', data=template_data, draft_check=False)
+    return render_template('feed.html', data=template_data)
 
 
 @app.route('/about')

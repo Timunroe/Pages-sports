@@ -157,7 +157,7 @@ def db_insert(c_posts, check=True):
                 # print(f"Post draft_api is: {post['draft_api']}")
                 if post['draft_api'] is True:
                     # print("Setting draft to 1 ...")
-                    new_post['draft'] = 1
+                    new_post['draft'] = '1'
                 # print("Defaults going in")
                 # print(new_post)
                 db.insert(new_post)
@@ -202,10 +202,10 @@ def get_lineup(s_file_name):
     # get records that are 1. not in draft 2. not in rank list
     # lineup = {} this not needed as we are returning list, not dict of lists
     # get any records with rank not equal to 0
-    rank_list = sorted(db.search(Record.rank != 0), key=itemgetter('rank'))
+    rank_list = sorted(db.search(Record.rank != '0'), key=itemgetter('rank'))
     # print(f"rank list is: {rank_list}")
     # NOTE:
-    published = [x for x in is_draft(db.all(), False) if x['rank'] == 0]
+    published = [x for x in is_draft(db.all(), False) if x['rank'] == '0']
     # print(f"++++++++\nPublished list is:\n")
     # for z in published:
     # print(z['title_api'])
@@ -260,7 +260,17 @@ def parse_form(form_data, kind="list"):
                         if item:
                             asset_id, field, new_value = item.split('__')
                             print(f"++++++++\nSetting this item: {asset_id} to {field}: {new_value}\n++++++++")
-                            db.update({field: int(new_value)}, Record.asset_id == asset_id)
+                            # ASSUMPTION WAS ONLY HANLDING VALUES WE WANTED TO TURN INTO INTEGERS
+                            # like draft ... either check what category we're updating, 
+                            # or use strings in database, and convert to integers some other time
+                            # WAIT!!!!! If select is multiple, then I should be getting the complete
+                            # new value for the field, don't have to append.
+                            # but how is the form value seen when it's submitted?
+                            # if field == 'category':
+                                # old_value = , then get category value (a list), append to it, then update
+                                # new_value - old_value
+                                # pass
+                            db.update({field: new_value}, Record.asset_id == asset_id)
                 else:
                     # check if empty string
                     if v:
@@ -308,12 +318,12 @@ def is_draft(val, condition=True):
     # returns true/false if given record
     # 'condition' is boolean. True means we want items in 'draft
     if condition is True:
-        records = [x for x in val if x['draft'] > 0]
+        records = [x for x in val if int(x['draft']) > 0]
         # print("+++++++++++\nThese items ARE in draft:")
         # for z in records:
         # print(z['title_api'])
     else:
-        records = [x for x in val if x['draft'] == 0]
+        records = [x for x in val if int(x['draft']) == 0]
         # print("+++++++++++\nThese items are NOT in draft:")
         # for z in records:
         # print(z['title_'])

@@ -3,9 +3,9 @@ config = {
     "db_name": "db.json",
     "db_fields_dflt": {
         'desc': '',
-        'draft': 0,  # int 0:published, 1-2: draft
-        'rank': 0, # int
-        'rank_time': 0, # int
+        'draft': '0',  # string 0:published, 1-2: draft
+        'rank': '0', # string
+        'rank_time': '0', # string
         'label': '',
         'title': '',
         'categories': [], # list of strings
